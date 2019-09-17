@@ -85,7 +85,7 @@
             "value": "superuser"
         },
         "adminPassword": {
-            "value": null
+            "value": "temp.neon123"
         },
         "diagnosticsStorageAccountName": {
             "value": "rgindiadiag321"
