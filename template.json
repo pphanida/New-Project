@@ -1,156 +1,119 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "subscriptionId": {
-            "type": "string"
+        "aseName": {
+            "defaultValue": "ASE-TEST",
+            "type": "String",
+            "metadata": {
+                "description": "Name of the App Service Environment"
+            }
         },
-        "name": {
-            "type": "string"
+        "aseLocation": {
+            "defaultValue": "West Europe",
+            "type": "String",
+            "metadata": {
+                "description": "Location of the App Service Environment"
+            }
         },
-        "location": {
-            "type": "string"
-        },
-        "hostingEnvironment": {
-            "type": "string"
-        },
-        "hostingPlanName": {
-            "type": "string"
-        },
-        "serverFarmResourceGroup": {
-            "type": "string"
-        },
-        "alwaysOn": {
-            "type": "bool"
-        },
-        "sku": {
-            "type": "string"
-        },
-        "skuCode": {
-            "type": "string"
-        },
-        "workerSize": {
-            "type": "string"
-        },
-        "workerSizeId": {
-            "type": "string"
-        },
-        "numberOfWorkers": {
-            "type": "string"
-        },
-        "currentStack": {
-            "type": "string"
-        },
-        "netFrameworkVersion": {
-            "type": "string"
+        "APP-SPLANName": {
+            "defaultValue": "ASE-APP-SERVICE-PLAN",
+            "type": "String",
+            "metadata": {
+                "description": "App service plan name"
+            }
         }
     },
-     "resources": [
+    "variables": {
+        "ASE-VNetPrefix": "10.0.0.0/16",
+        "ASE-VNetSubnet1Name": "Subnet-1",
+        "ASE-VNetSubnet1Prefix": "10.0.0.0/24",
+        "ASE-VNET-Name": "[concat('ASE-VNET', uniqueString(resourceGroup().id))]",
+        "WEB-APP-ASEv2Name": "[concat('WEB-APP-ASEv2', uniqueString(resourceGroup().id))]"
+    },
+    "resources": [
         {
-            "apiVersion": "2016-03-01",
-            "name": "[parameters('name')]",
-            "type": "Microsoft.Web/serverfarms",
-            "location": "[parameters('location')]",
-            "kind": "",
-            "properties": {
-                "name": "[parameters('name')]",
-                "workerSize": "[parameters('workerSize')]",
-                "workerSizeId": "[parameters('workerSizeId')]",
-                "numberOfWorkers": "[parameters('numberOfWorkers')]",
-                "reserved": false,
-                "hostingEnvironment": "[parameters('hostingEnvironment')]"
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('ASE-VNET-Name')]",
+            "apiVersion": "2016-03-30",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "ASE-VNET"
             },
-            "sku": {
-                "Tier": "[parameters('sku')]",
-                "Name": "[parameters('skuCode')]"
-            }
-        }
-    ]
             "properties": {
-                "name": "[parameters('name')]",
-                "siteConfig": {
-                    "appSettings": [
-                        {
-                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference('microsoft.insights/components/test-web123', '2015-05-01').InstrumentationKey]"
-                        },
-                        {
-                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
-                            "value": "~2"
-                        },
-                        {
-                            "name": "XDT_MicrosoftApplicationInsights_Mode",
-                            "value": "default"
-                        },
-                        {
-                            "name": "DiagnosticServices_EXTENSION_VERSION",
-                            "value": "disabled"
-                        },
-                        {
-                            "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
-                            "value": "disabled"
-                        },
-                        {
-                            "name": "APPINSIGHTS_SNAPSHOTFEATURE_VERSION",
-                            "value": "disabled"
-                        },
-                        {
-                            "name": "InstrumentationEngine_EXTENSION_VERSION",
-                            "value": "disabled"
-                        },
-                        {
-                            "name": "SnapshotDebugger_EXTENSION_VERSION",
-                            "value": "disabled"
-                        },
-                        {
-                            "name": "XDT_MicrosoftApplicationInsights_BaseExtensions",
-                            "value": "disabled"
-                        }
-                    ],
-                    "metadata": [
-                        {
-                            "name": "CURRENT_STACK",
-                            "value": "[parameters('currentStack')]"
-                        }
-                    ],
-                    "netFrameworkVersion": "[parameters('netFrameworkVersion')]",
-                    "alwaysOn": "[parameters('alwaysOn')]"
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('ASE-VNetPrefix')]"
+                    ]
                 },
-                "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
-                "hostingEnvironment": "[parameters('hostingEnvironment')]",
-                "clientAffinityEnabled": true
-            }
-        },
-        {
-            "apiVersion": "2018-02-01",
-            "name": "[parameters('hostingPlanName')]",
-            "type": "Microsoft.Web/serverfarms",
-            "location": "[parameters('location')]",
-            "kind": "",
-            "tags": {},
-            "dependsOn": [],
-            "properties": {
-                "name": "[parameters('hostingPlanName')]",
-                "workerSize": "[parameters('workerSize')]",
-                "workerSizeId": "[parameters('workerSizeId')]",
-                "numberOfWorkers": "[parameters('numberOfWorkers')]",
-                "hostingEnvironment": "[parameters('hostingEnvironment')]"
+                "subnets": [
+                    {
+                        "name": "[variables('ASE-VNetSubnet1Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('ASE-VNetSubnet1Prefix')]"
+                        }
+                    }
+                ]
             },
-            "sku": {
-                "Tier": "[parameters('sku')]",
-                "Name": "[parameters('skuCode')]"
-            }
+            "dependsOn": []
         },
         {
-            "apiVersion": "2015-05-01",
-            "name": "test-web123",
-            "type": "microsoft.insights/components",
-            "location": "centralus",
+            "type": "Microsoft.Web/hostingEnvironments",
+            "kind": "ASEV2",
+            "name": "[parameters('aseName')]",
+            "apiVersion": "2015-08-01",
+            "location": "[parameters('aseLocation')]",
+            "properties": {
+                "name": "[parameters('aseName')]",
+                "location": "[parameters('aseLocation')]",
+                "virtualNetwork": {
+                    "Id": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/', variables('ASE-VNET-Name'))]",
+                    "Subnet": "[variables('ASE-VNETSubnet1Name')]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('ASE-VNET-Name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "Tier": "Isolated",
+                "Name": "I1"
+            },
+            "kind": "",
+            "name": "[parameters('APP-SPLANName')]",
+            "apiVersion": "2016-03-01",
+            "location": "[parameters('aseLocation')]",
+            "properties": {
+                "name": "[parameters('APP-SPLANName')]",
+                "workerSize": "Small",
+                "workerSizeId": 0,
+                "numberOfWorkers": 1,
+                "reserved": false,
+                "hostingEnvironment": "[parameters('aseName')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/hostingEnvironments', parameters('aseName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "name": "[variables('WEB-APP-ASEv2Name')]",
+            "apiVersion": "2016-08-01",
+            "location": "[resourceGroup().location]",
             "tags": {},
             "properties": {
-                "ApplicationId": "[parameters('name')]",
-                "Request_Source": "IbizaWebAppExtensionCreate"
-            }
+                "name": "[variables('WEB-APP-ASEv2Name')]",
+                "hostingEnvironmentProfile": {
+                    "id": "[resourceId('Microsoft.Web/hostingEnvironments', parameters('aseName'))]"
+                },
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('APP-SPLANName'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('APP-SPLANName'))]",
+                "[resourceId('Microsoft.Web/hostingEnvironments', parameters('aseName'))]"
+            ]
         }
     ]
 }
