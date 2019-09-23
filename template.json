@@ -38,7 +38,10 @@
         "numberOfWorkers": {
             "type": "string"
         },
-        "linuxFxVersion": {
+        "currentStack": {
+            "type": "string"
+        },
+        "netFrameworkVersion": {
             "type": "string"
         }
     },
@@ -50,18 +53,62 @@
             "location": "[parameters('location')]",
             "tags": {},
             "dependsOn": [
+                "microsoft.insights/components/test-web123",
                 "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
             ],
             "properties": {
                 "name": "[parameters('name')]",
                 "siteConfig": {
-                    "appSettings": [],
-                    "linuxFxVersion": "[parameters('linuxFxVersion')]",
+                    "appSettings": [
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference('microsoft.insights/components/test-web123', '2015-05-01').InstrumentationKey]"
+                        },
+                        {
+                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_Mode",
+                            "value": "default"
+                        },
+                        {
+                            "name": "DiagnosticServices_EXTENSION_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "APPINSIGHTS_SNAPSHOTFEATURE_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "InstrumentationEngine_EXTENSION_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "SnapshotDebugger_EXTENSION_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_BaseExtensions",
+                            "value": "disabled"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "name": "CURRENT_STACK",
+                            "value": "[parameters('currentStack')]"
+                        }
+                    ],
+                    "netFrameworkVersion": "[parameters('netFrameworkVersion')]",
                     "alwaysOn": "[parameters('alwaysOn')]"
                 },
                 "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
                 "hostingEnvironment": "[parameters('hostingEnvironment')]",
-                "clientAffinityEnabled": false
+                "clientAffinityEnabled": true
             }
         },
         {
@@ -69,7 +116,7 @@
             "name": "[parameters('hostingPlanName')]",
             "type": "Microsoft.Web/serverfarms",
             "location": "[parameters('location')]",
-            "kind": "linux",
+            "kind": "",
             "tags": {},
             "dependsOn": [],
             "properties": {
@@ -77,12 +124,22 @@
                 "workerSize": "[parameters('workerSize')]",
                 "workerSizeId": "[parameters('workerSizeId')]",
                 "numberOfWorkers": "[parameters('numberOfWorkers')]",
-                "reserved": true,
                 "hostingEnvironment": "[parameters('hostingEnvironment')]"
             },
             "sku": {
                 "Tier": "[parameters('sku')]",
                 "Name": "[parameters('skuCode')]"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01",
+            "name": "test-web123",
+            "type": "microsoft.insights/components",
+            "location": "centralus",
+            "tags": {},
+            "properties": {
+                "ApplicationId": "[parameters('name')]",
+                "Request_Source": "IbizaWebAppExtensionCreate"
             }
         }
     ]
