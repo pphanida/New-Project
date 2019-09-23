@@ -45,17 +45,27 @@
             "type": "string"
         }
     },
-    "resources": [
+     "resources": [
         {
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2016-03-01",
             "name": "[parameters('name')]",
-            "type": "Microsoft.Web/sites",
+            "type": "Microsoft.Web/serverfarms",
             "location": "[parameters('location')]",
-            "tags": {},
-            "dependsOn": [
-                "microsoft.insights/components/test-web123",
-                "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
-            ],
+            "kind": "",
+            "properties": {
+                "name": "[parameters('name')]",
+                "workerSize": "[parameters('workerSize')]",
+                "workerSizeId": "[parameters('workerSizeId')]",
+                "numberOfWorkers": "[parameters('numberOfWorkers')]",
+                "reserved": false,
+                "hostingEnvironment": "[parameters('hostingEnvironment')]"
+            },
+            "sku": {
+                "Tier": "[parameters('sku')]",
+                "Name": "[parameters('skuCode')]"
+            }
+        }
+    ]
             "properties": {
                 "name": "[parameters('name')]",
                 "siteConfig": {
