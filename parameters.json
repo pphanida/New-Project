@@ -1,45 +1,146 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "subscriptionId": {
-            "value": "fd718da2-6b22-4dd5-b0d1-c708e37c5ae8"
+            "type": "string"
         },
         "name": {
-            "value": "EshanWeb-App"
+            "type": "string"
         },
         "location": {
-            "value": "Central US"
+            "type": "string"
         },
         "hostingEnvironment": {
-            "value": ""
+            "type": "string"
         },
         "hostingPlanName": {
-            "value": "ASP-RGIndia-a5e5"
+            "type": "string"
         },
         "serverFarmResourceGroup": {
-            "value": "RG-India"
+            "type": "string"
         },
         "alwaysOn": {
-            "value": true
+            "type": "bool"
         },
         "sku": {
-            "value": "PremiumV2"
+            "type": "string"
         },
         "skuCode": {
-            "value": "P1v2"
+            "type": "string"
         },
         "workerSize": {
-            "value": "3"
+            "type": "string"
         },
         "workerSizeId": {
-            "value": "3"
+            "type": "string"
         },
         "numberOfWorkers": {
-            "value": "1"
+            "type": "string"
         },
-        "linuxFxVersion": {
-            "value": "JAVA|11-java11"
+        "currentStack": {
+            "type": "string"
+        },
+        "netFrameworkVersion": {
+            "type": "string"
         }
-    }
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Web/sites",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "dependsOn": [
+                "microsoft.insights/components/test-web123",
+                "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+            ],
+            "properties": {
+                "name": "[parameters('name')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference('microsoft.insights/components/test-web123', '2015-05-01').InstrumentationKey]"
+                        },
+                        {
+                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_Mode",
+                            "value": "default"
+                        },
+                        {
+                            "name": "DiagnosticServices_EXTENSION_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "APPINSIGHTS_SNAPSHOTFEATURE_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "InstrumentationEngine_EXTENSION_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "SnapshotDebugger_EXTENSION_VERSION",
+                            "value": "disabled"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_BaseExtensions",
+                            "value": "disabled"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "name": "CURRENT_STACK",
+                            "value": "[parameters('currentStack')]"
+                        }
+                    ],
+                    "netFrameworkVersion": "[parameters('netFrameworkVersion')]",
+                    "alwaysOn": "[parameters('alwaysOn')]"
+                },
+                "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+                "hostingEnvironment": "[parameters('hostingEnvironment')]",
+                "clientAffinityEnabled": true
+            }
+        },
+        {
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('hostingPlanName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[parameters('location')]",
+            "kind": "",
+            "tags": {},
+            "dependsOn": [],
+            "properties": {
+                "name": "[parameters('hostingPlanName')]",
+                "workerSize": "[parameters('workerSize')]",
+                "workerSizeId": "[parameters('workerSizeId')]",
+                "numberOfWorkers": "[parameters('numberOfWorkers')]",
+                "hostingEnvironment": "[parameters('hostingEnvironment')]"
+            },
+            "sku": {
+                "Tier": "[parameters('sku')]",
+                "Name": "[parameters('skuCode')]"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01",
+            "name": "test-web123",
+            "type": "microsoft.insights/components",
+            "location": "centralus",
+            "tags": {},
+            "properties": {
+                "ApplicationId": "[parameters('name')]",
+                "Request_Source": "IbizaWebAppExtensionCreate"
+            }
+        }
+    ]
 }
