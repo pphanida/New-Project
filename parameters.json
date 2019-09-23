@@ -6,16 +6,16 @@
             "value": "fd718da2-6b22-4dd5-b0d1-c708e37c5ae8"
         },
         "name": {
-            "value": "test-web123"
+            "value": "manash"
         },
         "location": {
-            "value": "Central US"
+            "value": "West US 2"
         },
         "hostingEnvironment": {
             "value": ""
         },
         "hostingPlanName": {
-            "value": "ASP-WEBTest-95e8"
+            "value": "ASP-WEBTest-ba67"
         },
         "serverFarmResourceGroup": {
             "value": "WEB-Test"
@@ -42,7 +42,7 @@
             "value": "dotnet"
         },
         "netFrameworkVersion": {
-            "value": "v2.0"
+            "value": "v4.0"
         }
     }
 }
